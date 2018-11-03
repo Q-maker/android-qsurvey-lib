@@ -1,4 +1,4 @@
-package freedev.qsurvey_android;
+package com.android.qmaker.survey;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("freedev.qsurvey_android.test", appContext.getPackageName());
+        assertEquals("com.devup.qcm.survey.android.test", appContext.getPackageName());
     }
 }

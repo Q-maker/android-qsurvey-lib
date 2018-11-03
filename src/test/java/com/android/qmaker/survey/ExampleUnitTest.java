@@ -1,4 +1,4 @@
-package freedev.qsurvey_android;
+package com.android.qmaker.survey;
 
 import org.junit.Test;
 

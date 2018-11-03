@@ -1,0 +1,73 @@
+package com.android.qmaker.survey.core;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+
+import com.qmaker.survey.core.engines.QSurvey;
+import com.qmaker.survey.core.entities.PushOrder;
+
+import java.util.List;
+
+import istat.android.data.access.sqlite.SQLite;
+import istat.android.data.access.sqlite.utils.TableUtils;
+
+public class SQLitePersistenceUnit implements QSurvey.PersistenceUnit {
+    final static String DB_NAME = "survey.db";
+    final static int DB_VERSION = 1;
+
+    SQLitePersistenceUnit() {
+        SQLite.addConnection(new SQLite.SQLiteConnection(getContext(), DB_NAME, DB_VERSION) {
+            @Override
+            public void onCreateDb(SQLiteDatabase db) {
+                try {
+                    TableUtils.create(db, PushOrder.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onUpgradeDb(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+            }
+        });
+    }
+
+    @Override
+    public boolean persist(PushOrder order) {
+        try {
+            return getSQL().persist(order).execute().length > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public List<PushOrder> findAll() {
+        try {
+            getSQL().findAll(PushOrder.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean delete(PushOrder order) {
+        try {
+            return getSQL().delete(order);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Context getContext() {
+        return AndroidQSurvey.getInstance().getContext();
+    }
+
+    private SQLite.SQL getSQL() throws Exception {
+        return SQLite.fromConnection(DB_NAME);
+    }
+}
