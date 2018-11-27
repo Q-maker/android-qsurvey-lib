@@ -18,13 +18,28 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         this.context = context;
     }
 
-    public static void initialize(Context context) {
+    public static AndroidQSurvey initialize(Context context) {
+        if (instance != null) {
+            throw new IllegalStateException("AndroidQSurvey instance is already initialized and is ready do be get using getInstance");
+        }
         instance = new AndroidQSurvey(context);
         instance.init();
+        return instance;
+    }
+
+    public boolean isInitialized() {
+        return instance != null;
     }
 
     private void init() {
-        QSurvey.getInstance().registerSurveyStateListener(0, this);
+        QSurvey qSurvey = QSurvey.getInstance(true);
+        qSurvey.usePersistenceUnit(new SQLitePersistenceUnit());
+        qSurvey.registerSurveyStateListener(0, this);
+        //TODO start or prepare Workers.
+    }
+
+    public QSurvey getQSurveyInstance() {
+        return QSurvey.getInstance();
     }
 
     public static AndroidQSurvey getInstance() {
@@ -36,6 +51,20 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
 
     @Override
     public void onSurveyCompleted(Survey survey, CopySheet copySheet) {
-        //TODO display PushUI.
+        if (Survey.TYPE_SYNCHRONOUS.equals(survey.getType())) {
+            //TODO diplay UI
+        }
+    }
+
+    public boolean registerSurveyStateListener(QSurvey.SurveyStateListener stateListener) {
+        return getQSurveyInstance().registerSurveyStateListener(stateListener);
+    }
+
+    public boolean registerSurveyStateListener(int priority, QSurvey.SurveyStateListener stateListener) {
+        return getQSurveyInstance().registerSurveyStateListener(priority, stateListener);
+    }
+
+    public boolean unregisterSurveyStateListener(QSurvey.SurveyStateListener stateListener) {
+        return getQSurveyInstance().unregisterRunStateListener(stateListener);
     }
 }

@@ -3,20 +3,24 @@ package com.android.qmaker.survey.core;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.qmaker.survey.core.engines.QSurvey;
 import com.qmaker.survey.core.entities.PushOrder;
+import com.qmaker.survey.core.interfaces.PersistenceUnit;
 
 import java.util.List;
 
 import istat.android.data.access.sqlite.SQLite;
 import istat.android.data.access.sqlite.utils.TableUtils;
 
-public class SQLitePersistenceUnit implements QSurvey.PersistenceUnit {
+public class SQLitePersistenceUnit implements PersistenceUnit {
     final static String DB_NAME = "survey.db";
     final static int DB_VERSION = 1;
 
     SQLitePersistenceUnit() {
-        SQLite.addConnection(new SQLite.SQLiteConnection(getContext(), DB_NAME, DB_VERSION) {
+        this(DB_NAME, DB_VERSION);
+    }
+
+    SQLitePersistenceUnit(String dbName, int dbVersion) {
+        SQLite.addConnection(new SQLite.SQLiteConnection(getContext(), dbName, dbVersion) {
             @Override
             public void onCreateDb(SQLiteDatabase db) {
                 try {
