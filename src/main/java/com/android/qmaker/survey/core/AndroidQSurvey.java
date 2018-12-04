@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.android.qmaker.survey.core.pushers.FileIoPusher;
 import com.qmaker.core.entities.CopySheet;
+import com.qmaker.core.entities.Test;
 import com.qmaker.survey.core.engines.QSurvey;
 import com.qmaker.survey.core.entities.Survey;
 
@@ -54,7 +55,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     }
 
     @Override
-    public void onSurveyCompleted(Survey survey, CopySheet copySheet) {
+    public void onSurveyCompleted(Survey survey, Test test, CopySheet copySheet) {
         if (Survey.TYPE_SYNCHRONOUS.equals(survey.getType())) {
             //TODO diplay UI
             Log.d(TAG, "survey completed");
