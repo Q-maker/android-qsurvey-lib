@@ -1,12 +1,15 @@
 package com.android.qmaker.survey.core;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.android.qmaker.survey.core.pushers.FileIoPusher;
 import com.qmaker.core.entities.CopySheet;
 import com.qmaker.survey.core.engines.QSurvey;
 import com.qmaker.survey.core.entities.Survey;
 
 public class AndroidQSurvey implements QSurvey.SurveyStateListener {
+    public final static String TAG = "AndroidQSurvey";
     Context context;
     static AndroidQSurvey instance;
 
@@ -35,6 +38,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         QSurvey qSurvey = QSurvey.getInstance(true);
         qSurvey.usePersistenceUnit(new SQLitePersistenceUnit());
         qSurvey.registerSurveyStateListener(0, this);
+        qSurvey.appendPusher(new FileIoPusher(this.context));
         //TODO start or prepare Workers.
     }
 
@@ -53,6 +57,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     public void onSurveyCompleted(Survey survey, CopySheet copySheet) {
         if (Survey.TYPE_SYNCHRONOUS.equals(survey.getType())) {
             //TODO diplay UI
+            Log.d(TAG, "survey completed");
         }
     }
 
