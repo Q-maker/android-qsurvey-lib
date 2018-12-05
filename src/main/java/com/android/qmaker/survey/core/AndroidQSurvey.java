@@ -1,9 +1,16 @@
 package com.android.qmaker.survey.core;
 
+import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.android.qmaker.survey.core.pushers.FileIoPusher;
+import com.android.qmaker.survey.core.pushers.HttpBasicPusher;
+import com.android.qmaker.survey.core.pushers.JwtPusher;
+import com.android.qmaker.survey.core.pushers.MemoryPusher;
+import com.android.qmaker.survey.core.pushers.WssePusher;
 import com.qmaker.core.entities.CopySheet;
 import com.qmaker.core.entities.Test;
 import com.qmaker.survey.core.engines.QSurvey;
@@ -31,16 +38,56 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         return instance;
     }
 
+    public void terminate() {
+        Application application = instance.getApplication();
+        if (application != null) {
+            application.unregisterActivityLifecycleCallbacks(mActivityLifeCycleListener);
+        }
+        QSurvey qSurvey = QSurvey.getInstance(true);
+        qSurvey.unregisterRunStateListener(this);
+        instance = null;
+    }
+
     public boolean isInitialized() {
         return instance != null;
     }
 
     private void init() {
+        QSurvey qSurvey = prepare();
+        qSurvey.appendPusher(new FileIoPusher(this.context));
+        qSurvey.appendPusher(new JwtPusher());
+        qSurvey.appendPusher(new WssePusher());
+        qSurvey.appendPusher(new HttpBasicPusher());
+        qSurvey.appendPusher(new MemoryPusher());
+        //TODO start or prepare Workers.
+    }
+
+    private QSurvey prepare() {
+        Application application = getApplication();
+        if (application != null) {
+            application.registerActivityLifecycleCallbacks(mActivityLifeCycleListener);
+        }
         QSurvey qSurvey = QSurvey.getInstance(true);
         qSurvey.usePersistenceUnit(new SQLitePersistenceUnit());
         qSurvey.registerSurveyStateListener(0, this);
-        qSurvey.appendPusher(new FileIoPusher(this.context));
-        //TODO start or prepare Workers.
+        return qSurvey;
+    }
+
+    public void reset() {
+        Application application = getApplication();
+        if (application != null) {
+            application.unregisterActivityLifecycleCallbacks(mActivityLifeCycleListener);
+        }
+        prepare();
+    }
+
+    private Application getApplication() {
+        try {
+            return (Application) context.getApplicationContext();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public QSurvey getQSurveyInstance() {
@@ -73,4 +120,42 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     public boolean unregisterSurveyStateListener(QSurvey.SurveyStateListener stateListener) {
         return getQSurveyInstance().unregisterRunStateListener(stateListener);
     }
+
+    Activity currentShowingActivity = null;
+    private Application.ActivityLifecycleCallbacks mActivityLifeCycleListener = new Application.ActivityLifecycleCallbacks() {
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+
+        }
+
+        @Override
+        public void onActivityStarted(Activity activity) {
+            currentShowingActivity = activity;
+        }
+
+        @Override
+        public void onActivityResumed(Activity activity) {
+            currentShowingActivity = activity;
+        }
+
+        @Override
+        public void onActivityPaused(Activity activity) {
+
+        }
+
+        @Override
+        public void onActivityStopped(Activity activity) {
+
+        }
+
+        @Override
+        public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+        }
+
+        @Override
+        public void onActivityDestroyed(Activity activity) {
+            currentShowingActivity = null;
+        }
+    };
 }

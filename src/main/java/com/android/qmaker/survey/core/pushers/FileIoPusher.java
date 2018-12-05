@@ -21,7 +21,7 @@ import istat.android.base.tools.ToolKits;
 
 
 public class FileIoPusher implements Pusher {
-    public final static String ACCEPTED_GRAND_TYPE = Repository.GRAND_TYPE_WSSE;// "file";
+    public final static String ACCEPTED_GRAND_TYPE = "file";
     File rootDir;
 
     public FileIoPusher(Context context) {
