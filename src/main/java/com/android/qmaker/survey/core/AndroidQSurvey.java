@@ -4,22 +4,22 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
-import com.android.qmaker.survey.core.pushers.FileIoPusher;
-import com.android.qmaker.survey.core.pushers.HttpBasicPusher;
-import com.android.qmaker.survey.core.pushers.JwtPusher;
-import com.android.qmaker.survey.core.pushers.MemoryPusher;
-import com.android.qmaker.survey.core.pushers.WssePusher;
-import com.qmaker.core.entities.CopySheet;
-import com.qmaker.core.entities.Test;
+import com.qmaker.survey.core.engines.PushExecutor;
+import com.qmaker.survey.core.utils.pushers.HttpBasicPusher;
+import com.qmaker.survey.core.utils.pushers.JwtPusher;
+import com.qmaker.survey.core.utils.pushers.MemoryPusher;
+import com.qmaker.survey.core.utils.pushers.WssePusher;
 import com.qmaker.survey.core.engines.QSurvey;
 import com.qmaker.survey.core.entities.Survey;
+
+import java.util.List;
 
 public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     public final static String TAG = "AndroidQSurvey";
     Context context;
     static AndroidQSurvey instance;
+    UIDisplayer uiDisplayer = DEFAULT_UI_DISPLAYER;
 
     public Context getContext() {
         return context;
@@ -54,12 +54,16 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
 
     private void init() {
         QSurvey qSurvey = prepare();
-        qSurvey.appendPusher(new FileIoPusher(this.context));
+//        qSurvey.appendPusher(new FileIoPusher(this.context));
         qSurvey.appendPusher(new JwtPusher());
         qSurvey.appendPusher(new WssePusher());
         qSurvey.appendPusher(new HttpBasicPusher());
         qSurvey.appendPusher(new MemoryPusher());
         //TODO start or prepare Workers.
+    }
+
+    public void useUIDisplayer(UIDisplayer uiDisplayer) {
+        this.uiDisplayer = uiDisplayer;
     }
 
     private QSurvey prepare() {
@@ -79,6 +83,10 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
             application.unregisterActivityLifecycleCallbacks(mActivityLifeCycleListener);
         }
         prepare();
+    }
+
+    public List<PushExecutor.Task> syncResults() {
+        return getQSurveyInstance().syncResults();
     }
 
     private Application getApplication() {
@@ -102,11 +110,22 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     }
 
     @Override
-    public void onSurveyCompleted(Survey survey, Test test, CopySheet copySheet) {
-        if (Survey.TYPE_SYNCHRONOUS.equals(survey.getType())) {
-            //TODO diplay UI
-            Log.d(TAG, "survey completed");
+    public void onSurveyCompleted(Survey.Result result) {
+        if (Survey.TYPE_SYNCHRONOUS.equals(result.getOrigin().getType())) {
+            if (uiDisplayer != null) {
+                uiDisplayer.onSurveyResultPublishStateChanged(currentShowingActivity, UIDisplayer.STATE_STARTED, result);
+                getPushExecutor().registerExecutionStateChangeListener(new PushExecutor.ExecutionStateChangeListener() {
+                    @Override
+                    public void onTaskStateChanged(PushExecutor.Task task) {
+
+                    }
+                });
+            }
         }
+    }
+
+    PushExecutor getPushExecutor() {
+        return getQSurveyInstance().getPushExecutor();
     }
 
     public boolean registerSurveyStateListener(QSurvey.SurveyStateListener stateListener) {
@@ -156,6 +175,19 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         @Override
         public void onActivityDestroyed(Activity activity) {
             currentShowingActivity = null;
+        }
+    };
+
+    public interface UIDisplayer {
+        int STATE_STARTED = 0, STATE_SUCCESS = 1, STATE_FAILED = 2;
+
+        void onSurveyResultPublishStateChanged(Activity currentActivity, int state, Survey.Result result);
+    }
+
+    public static final UIDisplayer DEFAULT_UI_DISPLAYER = new UIDisplayer() {
+        @Override
+        public void onSurveyResultPublishStateChanged(Activity currentActivity, int state, Survey.Result result) {
+
         }
     };
 }
