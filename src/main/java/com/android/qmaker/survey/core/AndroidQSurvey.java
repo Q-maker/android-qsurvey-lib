@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.qmaker.survey.core.engines.PushExecutor;
+import com.qmaker.survey.core.utils.PayLoad;
 import com.qmaker.survey.core.utils.pushers.HttpBasicPusher;
 import com.qmaker.survey.core.utils.pushers.JwtPusher;
 import com.qmaker.survey.core.utils.pushers.MemoryPusher;
@@ -110,10 +111,11 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     }
 
     @Override
-    public void onSurveyCompleted(Survey.Result result) {
+    public void onSurveyStateChanged(int state, Survey survey, PayLoad payLoad) {
+        Survey.Result result = payLoad.getVariable(0, Survey.Result.class);
         if (Survey.TYPE_SYNCHRONOUS.equals(result.getOrigin().getType())) {
             if (uiDisplayer != null) {
-                uiDisplayer.onSurveyResultPublishStateChanged(currentShowingActivity, UIDisplayer.STATE_STARTED, result);
+                uiDisplayer.onSurveyResultPublishStateChanged(currentShowingActivity, UIDisplayer.STATE_STARTED, payLoad);
                 getPushExecutor().registerExecutionStateChangeListener(new PushExecutor.ExecutionStateChangeListener() {
                     @Override
                     public void onTaskStateChanged(PushExecutor.Task task) {
@@ -181,13 +183,19 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     public interface UIDisplayer {
         int STATE_STARTED = 0, STATE_SUCCESS = 1, STATE_FAILED = 2;
 
-        void onSurveyResultPublishStateChanged(Activity currentActivity, int state, Survey.Result result);
+        void onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad);
     }
 
     public static final UIDisplayer DEFAULT_UI_DISPLAYER = new UIDisplayer() {
         @Override
-        public void onSurveyResultPublishStateChanged(Activity currentActivity, int state, Survey.Result result) {
+        public void onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad) {
+            if (STATE_STARTED == state) {
 
+            } else if (STATE_SUCCESS == state) {
+
+            } else if (STATE_FAILED == state) {
+
+            }
         }
     };
 }
