@@ -7,20 +7,20 @@ import android.os.Bundle;
 
 import com.qmaker.survey.core.engines.PushExecutor;
 import com.qmaker.survey.core.utils.PayLoad;
-import com.qmaker.survey.core.utils.pushers.HttpBasicPusher;
-import com.qmaker.survey.core.utils.pushers.JwtPusher;
-import com.qmaker.survey.core.utils.pushers.MemoryPusher;
-import com.qmaker.survey.core.utils.pushers.WssePusher;
+import com.android.qmaker.survey.core.pushers.HttpBasicPusher;
+import com.android.qmaker.survey.core.pushers.JwtPusher;
+import com.android.qmaker.survey.core.pushers.WssePusher;
 import com.qmaker.survey.core.engines.QSurvey;
 import com.qmaker.survey.core.entities.Survey;
+import com.qmaker.survey.core.pushers.HttpDigestPusher;
 
 import java.util.List;
-
+//TODO se décider a untiliser un UIDisplayerProvider ou un seul useUIDIsplayer
 public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     public final static String TAG = "AndroidQSurvey";
     Context context;
     static AndroidQSurvey instance;
-    UIDisplayer uiDisplayer = DEFAULT_UI_DISPLAYER;
+    UIHandler.Displayer uiDisplayer = DEFAULT_UI_DISPLAYER;
 
     public Context getContext() {
         return context;
@@ -45,7 +45,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
             application.unregisterActivityLifecycleCallbacks(mActivityLifeCycleListener);
         }
         QSurvey qSurvey = QSurvey.getInstance(true);
-        qSurvey.unregisterRunStateListener(this);
+        qSurvey.unregisterSurveyStateListener(this);
         instance = null;
     }
 
@@ -59,11 +59,11 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         qSurvey.appendPusher(new JwtPusher());
         qSurvey.appendPusher(new WssePusher());
         qSurvey.appendPusher(new HttpBasicPusher());
-        qSurvey.appendPusher(new MemoryPusher());
+        qSurvey.appendPusher(new HttpDigestPusher());
         //TODO start or prepare Workers.
     }
 
-    public void useUIDisplayer(UIDisplayer uiDisplayer) {
+    public void useUIDisplayer(UIHandler.Displayer uiDisplayer) {
         this.uiDisplayer = uiDisplayer;
     }
 
@@ -112,10 +112,10 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
 
     @Override
     public void onSurveyStateChanged(int state, Survey survey, PayLoad payLoad) {
-        Survey.Result result = payLoad.getVariable(0, Survey.Result.class);
-        if (Survey.TYPE_SYNCHRONOUS.equals(result.getOrigin().getType())) {
+        if (state == QSurvey.SurveyStateListener.STATE_FINISH &&
+                Survey.TYPE_SYNCHRONOUS.equals(survey.getType())) {
             if (uiDisplayer != null) {
-                uiDisplayer.onSurveyResultPublishStateChanged(currentShowingActivity, UIDisplayer.STATE_STARTED, payLoad);
+                uiDisplayer.onSurveyResultPublishStateChanged(currentShowingActivity, UIHandler.Displayer.STATE_STARTED, payLoad);
                 getPushExecutor().registerExecutionStateChangeListener(new PushExecutor.ExecutionStateChangeListener() {
                     @Override
                     public void onTaskStateChanged(PushExecutor.Task task) {
@@ -139,7 +139,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     }
 
     public boolean unregisterSurveyStateListener(QSurvey.SurveyStateListener stateListener) {
-        return getQSurveyInstance().unregisterRunStateListener(stateListener);
+        return getQSurveyInstance().unregisterSurveyStateListener(stateListener);
     }
 
     Activity currentShowingActivity = null;
@@ -180,13 +180,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         }
     };
 
-    public interface UIDisplayer {
-        int STATE_STARTED = 0, STATE_SUCCESS = 1, STATE_FAILED = 2;
-
-        void onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad);
-    }
-
-    public static final UIDisplayer DEFAULT_UI_DISPLAYER = new UIDisplayer() {
+    public static final UIHandler.Displayer DEFAULT_UI_DISPLAYER = new UIHandler.Displayer() {
         @Override
         public void onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad) {
             if (STATE_STARTED == state) {

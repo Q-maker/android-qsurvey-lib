@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.qmaker.survey.core">
 
-    <application>
-        <activity android:name=".PushActivity"></activity>
-    </application>
+    <application></application>
 
 </manifest>
