@@ -8,6 +8,6 @@ public class UIHandler {
     public interface Displayer {
         int STATE_STARTED = 0, STATE_SUCCESS = 1, STATE_FAILED = 2;
 
-        void onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad);
+        boolean onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad);
     }
 }

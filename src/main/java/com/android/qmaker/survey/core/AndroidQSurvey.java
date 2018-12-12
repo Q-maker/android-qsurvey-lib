@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
+import com.qmaker.core.engines.QRunner;
+import com.qmaker.core.interfaces.RunnableDispatcher;
 import com.qmaker.survey.core.engines.PushExecutor;
 import com.qmaker.survey.core.utils.PayLoad;
 import com.android.qmaker.survey.core.pushers.HttpBasicPusher;
@@ -14,13 +18,19 @@ import com.qmaker.survey.core.engines.QSurvey;
 import com.qmaker.survey.core.entities.Survey;
 import com.qmaker.survey.core.pushers.HttpDigestPusher;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-//TODO se décider a untiliser un UIDisplayerProvider ou un seul useUIDIsplayer
+
 public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     public final static String TAG = "AndroidQSurvey";
     Context context;
     static AndroidQSurvey instance;
-    UIHandler.Displayer uiDisplayer = DEFAULT_UI_DISPLAYER;
+    static List<UIHandler.Displayer> uiDisplayers = Collections.synchronizedList(new ArrayList() {
+        {
+            add(DEFAULT_UI_DISPLAYER);
+        }
+    });
 
     public Context getContext() {
         return context;
@@ -49,6 +59,10 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         instance = null;
     }
 
+    public static void setRunnableDispatcher(RunnableDispatcher runnableDispatcher) {
+        QSurvey.setRunnableDispatcher(runnableDispatcher);
+    }
+
     public boolean isInitialized() {
         return instance != null;
     }
@@ -63,8 +77,30 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         //TODO start or prepare Workers.
     }
 
-    public void useUIDisplayer(UIHandler.Displayer uiDisplayer) {
-        this.uiDisplayer = uiDisplayer;
+    public boolean appendUIDisplayer(UIHandler.Displayer uiDisplayer) {
+        return appendUIDisplayer(-1, uiDisplayer);
+    }
+
+    public boolean appendUIDisplayer(int priority, UIHandler.Displayer uiDisplayer) {
+        synchronized (uiDisplayers) {
+            if (uiDisplayer == null || uiDisplayers.contains(uiDisplayer)) {
+                return false;
+            }
+            if (priority >= 0 && priority <= uiDisplayers.size() - 1) {
+                uiDisplayers.add(priority, uiDisplayer);
+            } else {
+                uiDisplayers.add(uiDisplayer);
+            }
+            return true;
+        }
+    }
+
+    public boolean removeUIDisplayer(UIHandler.Displayer uiDisplayer) {
+        if (uiDisplayer == null || !uiDisplayers.contains(uiDisplayer)) {
+            return false;
+        }
+        uiDisplayers.remove(uiDisplayer);
+        return true;
     }
 
     private QSurvey prepare() {
@@ -114,16 +150,46 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     public void onSurveyStateChanged(int state, Survey survey, PayLoad payLoad) {
         if (state == QSurvey.SurveyStateListener.STATE_FINISH &&
                 Survey.TYPE_SYNCHRONOUS.equals(survey.getType())) {
-            if (uiDisplayer != null) {
-                uiDisplayer.onSurveyResultPublishStateChanged(currentShowingActivity, UIHandler.Displayer.STATE_STARTED, payLoad);
-                getPushExecutor().registerExecutionStateChangeListener(new PushExecutor.ExecutionStateChangeListener() {
-                    @Override
-                    public void onTaskStateChanged(PushExecutor.Task task) {
+            //TODO faire jouer le UIHandler
+//            if (uiDisplayer != null) {
+//                uiDisplayer.onSurveyResultPublishStateChanged(currentShowingActivity, UIHandler.Displayer.STATE_STARTED, payLoad);
+//                getPushExecutor().registerExecutionStateChangeListener(new PushExecutor.ExecutionStateChangeListener() {
+//                    @Override
+//                    public void onTaskStateChanged(PushExecutor.Task task) {
+//
+//                    }
+//                });
+//            }
+        }
+    }
 
+    protected void dispatchDisplayerSurveyResultPublishStateChanged(final int state, final PayLoad payLoad) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                UIHandler.Displayer[] displayers = collectDisplayers();
+                if (displayers == null) {
+                    return;
+                }
+                for (UIHandler.Displayer displayer : displayers) {
+                    if (displayer.onSurveyResultPublishStateChanged(currentShowingActivity, state, payLoad)) {
+                        break;
                     }
-                });
+                }
+            }
+        };
+        getQSurveyInstance().getRunnableDispatcher().dispatch(runnable, 0);
+    }
+
+    private UIHandler.Displayer[] collectDisplayers() {
+        UIHandler.Displayer[] callbacks = null;
+        synchronized (uiDisplayers) {
+            if (uiDisplayers.size() > 0) {
+                callbacks = new UIHandler.Displayer[uiDisplayers.size()];
+                callbacks = uiDisplayers.toArray(callbacks);
             }
         }
+        return callbacks;
     }
 
     PushExecutor getPushExecutor() {
@@ -179,10 +245,10 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
             currentShowingActivity = null;
         }
     };
-
+    //TODO correctement implementer un Default avec de simple Dialogue.
     public static final UIHandler.Displayer DEFAULT_UI_DISPLAYER = new UIHandler.Displayer() {
         @Override
-        public void onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad) {
+        public boolean onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad) {
             if (STATE_STARTED == state) {
 
             } else if (STATE_SUCCESS == state) {
@@ -190,6 +256,33 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
             } else if (STATE_FAILED == state) {
 
             }
+            return false;
         }
+    };
+
+    public final static RunnableDispatcher DEFAULT_RUNNABLE_DISPATCHER = new RunnableDispatcher() {
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        @Override
+        public void dispatch(Runnable runnable, int delay) {
+            if (runnable != null) {
+                if (delay <= 0) {
+                    handler.post(runnable);
+                } else {
+                    handler.postDelayed(runnable, delay);
+                }
+            }
+        }
+
+        @Override
+        public void cancel(Runnable runnable) {
+            handler.removeCallbacks(runnable);
+        }
+
+        @Override
+        public void release() {
+            handler.removeCallbacksAndMessages(null);
+        }
+
     };
 }
