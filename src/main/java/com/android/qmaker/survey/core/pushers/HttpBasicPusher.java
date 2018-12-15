@@ -7,6 +7,7 @@ import com.qmaker.survey.core.interfaces.PushProcess;
 import com.qmaker.survey.core.interfaces.Pusher;
 
 import istat.android.network.http.AsyncHttp;
+import istat.android.network.http.BodyPartHttpQuery;
 import istat.android.network.http.SimpleHttpQuery;
 
 public class HttpBasicPusher implements Pusher {
@@ -25,7 +26,8 @@ public class HttpBasicPusher implements Pusher {
 
         @Override
         protected AsyncHttp onCreateAsyncHttp(PushOrder order) {
-            SimpleHttpQuery http = new SimpleHttpQuery();
+            BodyPartHttpQuery http = new BodyPartHttpQuery();
+            http.setBody(order);
             return AsyncHttp.from(http);
         }
     }

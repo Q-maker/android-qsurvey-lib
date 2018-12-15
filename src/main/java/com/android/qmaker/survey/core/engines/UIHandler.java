@@ -24,7 +24,7 @@ public final class UIHandler implements PushExecutor.ExecutionStateChangeListene
         this.pushOrders = Collections.synchronizedList(new ArrayList(pushOrders));
     }
 
-    void attach(AndroidQSurvey androidQSurvey) {
+    void startHandling(AndroidQSurvey androidQSurvey) {
         this.androidQSurvey = androidQSurvey;
         this.androidQSurvey.dispatchDisplayerSurveyResultPublishStateChanged(Displayer.STATE_STARTED, result, pushOrders);
         androidQSurvey

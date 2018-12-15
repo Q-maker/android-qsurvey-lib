@@ -2,18 +2,13 @@ package com.android.qmaker.survey.core.engines;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v7.app.AlertDialog;
 
 import com.android.qmaker.survey.core.utils.displayers.DialogUIDisplayer;
-import com.qmaker.core.entities.Marks;
 import com.qmaker.core.interfaces.RunnableDispatcher;
-import com.qmaker.core.utils.CopySheetUtils;
 import com.qmaker.survey.core.engines.PushExecutor;
 import com.qmaker.survey.core.entities.PushOrder;
 import com.qmaker.survey.core.interfaces.Pusher;
@@ -35,6 +30,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     Context context;
     static AndroidQSurvey instance;
     final HashMap<String, UIHandler> uiHandlerHashMap = new HashMap();
+    Handler mHandler = new Handler(Looper.getMainLooper());
 
     public Context getContext() {
         return context;
@@ -160,13 +156,12 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
             return;
         }
         int bitResult = QSurvey.SurveyStateListener.STATE_FINISH & state;
-        if (state == bitResult /*&&
-                !Survey.TYPE_ANONYMOUS.equals(survey.getType())*/) {//TODO filtrer en fonction du type de la survey.
+        if (state == bitResult) {
             Survey.Result result = payLoad.getVariable(0);
             List<PushOrder> pushOrders = payLoad.getVariable(1);
             UIHandler uiHandler = new UIHandler(result, pushOrders, currentShowingActivity);
             uiHandlerHashMap.put(survey.getId(), uiHandler);
-            uiHandler.attach(this);
+            uiHandler.startHandling(this);
         }
     }
 
@@ -211,7 +206,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
                 }
             }
         };
-        getQSurveyInstance().getRunnableDispatcher().dispatch(runnable, 0);
+        mHandler.post(runnable);
     }
 
     private UIHandler.Displayer[] collectDisplayers() {

@@ -14,11 +14,14 @@ import com.qmaker.survey.core.utils.PayLoad;
 
 import java.util.List;
 
-public class DialogUIDisplayer implements UIHandler.Displayer{
+public class DialogUIDisplayer implements UIHandler.Displayer {
     ProgressDialog progressDialog;
 
     @Override
     public boolean onSurveyResultPublishStateChanged(final Activity currentActivity, int state, PayLoad payLoad) {
+        if (currentActivity == null || currentActivity.isFinishing()) {
+            return false;
+        }
         if (STATE_STARTED == state) {
             progressDialog = new ProgressDialog(currentActivity);
             progressDialog.setMessage("Please wait, result publishing...");
