@@ -37,6 +37,7 @@ public final class UIHandler implements PushExecutor.ExecutionStateChangeListene
                 .getPushExecutor()
                 .unregisterExecutionStateChangeListener(this);
         out &= androidQSurvey.detachUIHandler(result.getOrigin());
+        this.androidQSurvey.dispatchDisplayerSurveyResultPublishStateChanged(Displayer.STATE_CANCELED, result, pushOrders, completedOrders);
         this.androidQSurvey = null;
         return out;
     }
@@ -60,7 +61,7 @@ public final class UIHandler implements PushExecutor.ExecutionStateChangeListene
     }
 
     public interface Displayer {
-        int STATE_STARTED = 0, STATE_PROGRESS = 3, STATE_FINISH = 4;
+        int STATE_STARTED = 0, STATE_PROGRESS = 3, STATE_FINISH = 4, STATE_CANCELED = 5;
 
         boolean onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad);
     }
