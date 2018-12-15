@@ -2,14 +2,20 @@ package com.android.qmaker.survey.core;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v7.app.AlertDialog;
 
-import com.qmaker.core.engines.QRunner;
+import com.qmaker.core.entities.Marks;
 import com.qmaker.core.interfaces.RunnableDispatcher;
+import com.qmaker.core.utils.CopySheetUtils;
 import com.qmaker.survey.core.engines.PushExecutor;
+import com.qmaker.survey.core.entities.PushOrder;
+import com.qmaker.survey.core.interfaces.Pusher;
 import com.qmaker.survey.core.utils.PayLoad;
 import com.android.qmaker.survey.core.pushers.HttpBasicPusher;
 import com.android.qmaker.survey.core.pushers.JwtPusher;
@@ -20,17 +26,14 @@ import com.qmaker.survey.core.pushers.HttpDigestPusher;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     public final static String TAG = "AndroidQSurvey";
     Context context;
     static AndroidQSurvey instance;
-    static List<UIHandler.Displayer> uiDisplayers = Collections.synchronizedList(new ArrayList() {
-        {
-            add(DEFAULT_UI_DISPLAYER);
-        }
-    });
+    final HashMap<String, UIHandler> uiHandlerHashMap = new HashMap();
 
     public Context getContext() {
         return context;
@@ -77,8 +80,12 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         //TODO start or prepare Workers.
     }
 
+    public Pusher appendPusher(Pusher pusher) {
+        return getQSurveyInstance().appendPusher(pusher);
+    }
+
     public boolean appendUIDisplayer(UIHandler.Displayer uiDisplayer) {
-        return appendUIDisplayer(-1, uiDisplayer);
+        return appendUIDisplayer(0, uiDisplayer);
     }
 
     public boolean appendUIDisplayer(int priority, UIHandler.Displayer uiDisplayer) {
@@ -148,19 +155,44 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
 
     @Override
     public void onSurveyStateChanged(int state, Survey survey, PayLoad payLoad) {
-        if (state == QSurvey.SurveyStateListener.STATE_FINISH &&
-                Survey.TYPE_SYNCHRONOUS.equals(survey.getType())) {
-            //TODO faire jouer le UIHandler
-//            if (uiDisplayer != null) {
-//                uiDisplayer.onSurveyResultPublishStateChanged(currentShowingActivity, UIHandler.Displayer.STATE_STARTED, payLoad);
-//                getPushExecutor().registerExecutionStateChangeListener(new PushExecutor.ExecutionStateChangeListener() {
-//                    @Override
-//                    public void onTaskStateChanged(PushExecutor.Task task) {
-//
-//                    }
-//                });
-//            }
+        if (state == QSurvey.SurveyStateListener.STATE_CANCELED) {
+            return;
         }
+        int bitResult = QSurvey.SurveyStateListener.STATE_FINISH & state;
+        if (state == bitResult /*&&
+                !Survey.TYPE_ANONYMOUS.equals(survey.getType())*/) {//TODO filtrer en fonction du type de la survey.
+            Survey.Result result = payLoad.getVariable(0);
+            List<PushOrder> pushOrders = payLoad.getVariable(1);
+            UIHandler uiHandler = new UIHandler(result, pushOrders, currentShowingActivity);
+            uiHandlerHashMap.put(survey.getId(), uiHandler);
+            uiHandler.attach(this);
+        }
+    }
+
+    boolean detachUIHandler(Survey survey) {
+        if (survey == null) {
+            return false;
+        }
+        return uiHandlerHashMap.remove(survey.getId()) != null;
+    }
+
+    boolean detachUIHandler(String surveyId) {
+        return uiHandlerHashMap.remove(surveyId) != null;
+    }
+
+    public UIHandler getUIHandler(Survey survey) {
+        if (survey == null) {
+            return null;
+        }
+        return getUIHandler(survey.getId());
+    }
+
+    public UIHandler getUIHandler(String surveyId) {
+        return uiHandlerHashMap.get(surveyId);
+    }
+
+    protected void dispatchDisplayerSurveyResultPublishStateChanged(final int state, Object... vars) {
+        dispatchDisplayerSurveyResultPublishStateChanged(state, new PayLoad(vars));
     }
 
     protected void dispatchDisplayerSurveyResultPublishStateChanged(final int state, final PayLoad payLoad) {
@@ -172,7 +204,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
                     return;
                 }
                 for (UIHandler.Displayer displayer : displayers) {
-                    if (displayer.onSurveyResultPublishStateChanged(currentShowingActivity, state, payLoad)) {
+                    if (displayer != null && displayer.onSurveyResultPublishStateChanged(currentShowingActivity, state, payLoad)) {
                         break;
                     }
                 }
@@ -182,14 +214,14 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     }
 
     private UIHandler.Displayer[] collectDisplayers() {
-        UIHandler.Displayer[] callbacks = null;
+        UIHandler.Displayer[] displayers = null;
         synchronized (uiDisplayers) {
             if (uiDisplayers.size() > 0) {
-                callbacks = new UIHandler.Displayer[uiDisplayers.size()];
-                callbacks = uiDisplayers.toArray(callbacks);
+                displayers = new UIHandler.Displayer[uiDisplayers.size()];
+                displayers = uiDisplayers.toArray(displayers);
             }
         }
-        return callbacks;
+        return displayers;
     }
 
     PushExecutor getPushExecutor() {
@@ -245,20 +277,57 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
             currentShowingActivity = null;
         }
     };
-    //TODO correctement implementer un Default avec de simple Dialogue.
+
     public static final UIHandler.Displayer DEFAULT_UI_DISPLAYER = new UIHandler.Displayer() {
+        ProgressDialog progressDialog;
+
         @Override
-        public boolean onSurveyResultPublishStateChanged(Activity currentActivity, int state, PayLoad payLoad) {
+        public boolean onSurveyResultPublishStateChanged(final Activity currentActivity, int state, PayLoad payLoad) {
             if (STATE_STARTED == state) {
-
-            } else if (STATE_SUCCESS == state) {
-
-            } else if (STATE_FAILED == state) {
+                progressDialog = new ProgressDialog(currentActivity);
+                progressDialog.setMessage("Please wait, result publishing...");
+                progressDialog.show();
+            } else if (STATE_PROGRESS == state) {
+                if (progressDialog != null) {
+                    List<PushOrder> list = payLoad.getVariable(2);
+                    Survey.Result result = payLoad.getVariable(0);
+                    int repositoryCount = result.getOrigin().getRepositories().size();
+                    progressDialog.setMessage("Please wait, result publishing " + (repositoryCount - list.size()) + "/" + repositoryCount);
+                }
+            } else if (STATE_FINISH == state) {
+                if (progressDialog != null) {
+                    progressDialog.cancel();
+                }
+                final Survey.Result result = payLoad.getVariable(0);
+                AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
+                //TODO build publish summary, with retry capbility.
+                builder.setTitle("Result");
+                builder.setMessage("Result published.")
+                        .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (result.getOrigin().getQuestionnaireConfig().isAutoCorrectionEnable()) {
+                                    try {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
+                                        Marks marks = CopySheetUtils.getMarks(result.getCopySheet(), result.getOrigin().getQuestionaire());
+                                        builder.setMessage("Score: " + marks.getValue() + "/" + marks.getMaximum());
+                                        builder.create().show();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }).create().show();
 
             }
-            return false;
+            return true;
         }
     };
+    static List<UIHandler.Displayer> uiDisplayers = Collections.synchronizedList(new ArrayList() {
+        {
+            add(DEFAULT_UI_DISPLAYER);
+        }
+    });
 
     public final static RunnableDispatcher DEFAULT_RUNNABLE_DISPATCHER = new RunnableDispatcher() {
         Handler handler = new Handler(Looper.getMainLooper());
