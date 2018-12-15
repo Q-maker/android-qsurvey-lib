@@ -22,7 +22,9 @@ import istat.android.network.http.HttpQueryError;
 import istat.android.network.http.HttpQueryResponse;
 import istat.android.network.http.HttpQueryResult;
 import istat.android.network.http.interfaces.DownloadHandler;
-
+/**
+ * @author Toukea Tatsi J
+ */
 public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, PushError> implements PushProcess {
     PushOrder order;
     ProcessManager processManager;

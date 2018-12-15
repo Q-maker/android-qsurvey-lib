@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-
+/**
+ * @author Toukea Tatsi J
+ */
 public class PushWorker extends Service {
     static PushWorker instance;
     public final static String ACTION_COMMAND_SYNC_RESULT = "sync_result";

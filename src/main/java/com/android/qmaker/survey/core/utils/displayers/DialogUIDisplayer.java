@@ -13,7 +13,9 @@ import com.qmaker.survey.core.entities.Survey;
 import com.qmaker.survey.core.utils.PayLoad;
 
 import java.util.List;
-
+/**
+ * @author Toukea Tatsi J
+ */
 public class DialogUIDisplayer implements UIHandler.Displayer {
     ProgressDialog progressDialog;
 

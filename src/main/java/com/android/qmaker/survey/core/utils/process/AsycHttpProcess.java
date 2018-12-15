@@ -1,7 +1,9 @@
 package com.android.qmaker.survey.core.utils.process;
 
 import com.istat.freedev.processor.Process;
-
+/**
+ * @author Toukea Tatsi J
+ */
 public class AsycHttpProcess<R, E extends Throwable> extends Process<R, E> {
     @Override
     protected void onExecute(ExecutionVariables executionVariables) throws Exception {

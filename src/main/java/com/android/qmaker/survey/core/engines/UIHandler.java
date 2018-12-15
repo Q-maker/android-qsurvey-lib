@@ -10,7 +10,9 @@ import com.qmaker.survey.core.utils.PayLoad;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+/**
+ * @author Toukea Tatsi J
+ */
 public final class UIHandler implements PushExecutor.ExecutionStateChangeListener {
     Survey.Result result;
     Activity activity;

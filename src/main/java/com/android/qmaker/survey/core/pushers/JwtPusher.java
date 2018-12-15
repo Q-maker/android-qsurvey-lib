@@ -7,7 +7,9 @@ import com.qmaker.survey.core.interfaces.PushProcess;
 import com.qmaker.survey.core.interfaces.Pusher;
 
 import istat.android.network.http.AsyncHttp;
-
+/**
+ * @author Toukea Tatsi J
+ */
 public class JwtPusher implements Pusher {
 
     @Override

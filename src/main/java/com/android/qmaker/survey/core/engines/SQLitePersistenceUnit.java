@@ -10,7 +10,9 @@ import java.util.List;
 
 import istat.android.data.access.sqlite.SQLite;
 import istat.android.data.access.sqlite.utils.TableUtils;
-
+/**
+ * @author Toukea Tatsi J
+ */
 public class SQLitePersistenceUnit implements PersistenceUnit {
     final static String DB_NAME = "survey.db";
     final static int DB_VERSION = 1;

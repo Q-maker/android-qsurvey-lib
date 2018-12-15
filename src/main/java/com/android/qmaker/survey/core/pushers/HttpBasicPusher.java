@@ -9,7 +9,9 @@ import com.qmaker.survey.core.interfaces.Pusher;
 import istat.android.network.http.AsyncHttp;
 import istat.android.network.http.BodyPartHttpQuery;
 import istat.android.network.http.SimpleHttpQuery;
-
+/**
+ * @author Toukea Tatsi J
+ */
 public class HttpBasicPusher implements Pusher {
     @Override
     public PushProcess push(PushOrder order, Callback callback) throws Exception {

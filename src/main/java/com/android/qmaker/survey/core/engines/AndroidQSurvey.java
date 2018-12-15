@@ -25,6 +25,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * @author Toukea Tatsi J
+ */
 public class AndroidQSurvey implements QSurvey.SurveyStateListener {
     public final static String TAG = "AndroidQSurvey";
     Context context;
