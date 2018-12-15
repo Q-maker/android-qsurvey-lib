@@ -1,4 +1,4 @@
-package com.android.qmaker.survey.core;
+package com.android.qmaker.survey.core.engines;
 
 import android.app.Activity;
 import android.app.Application;
@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AlertDialog;
 
+import com.android.qmaker.survey.core.utils.displayers.DialogUIDisplayer;
 import com.qmaker.core.entities.Marks;
 import com.qmaker.core.interfaces.RunnableDispatcher;
 import com.qmaker.core.utils.CopySheetUtils;
@@ -278,51 +279,7 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         }
     };
 
-    public static final UIHandler.Displayer DEFAULT_UI_DISPLAYER = new UIHandler.Displayer() {
-        ProgressDialog progressDialog;
-
-        @Override
-        public boolean onSurveyResultPublishStateChanged(final Activity currentActivity, int state, PayLoad payLoad) {
-            if (STATE_STARTED == state) {
-                progressDialog = new ProgressDialog(currentActivity);
-                progressDialog.setMessage("Please wait, result publishing...");
-                progressDialog.show();
-            } else if (STATE_PROGRESS == state) {
-                if (progressDialog != null) {
-                    List<PushOrder> list = payLoad.getVariable(2);
-                    Survey.Result result = payLoad.getVariable(0);
-                    int repositoryCount = result.getOrigin().getRepositories().size();
-                    progressDialog.setMessage("Please wait, result publishing " + (repositoryCount - list.size()) + "/" + repositoryCount);
-                }
-            } else if (STATE_FINISH == state) {
-                if (progressDialog != null) {
-                    progressDialog.cancel();
-                }
-                final Survey.Result result = payLoad.getVariable(0);
-                AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
-                //TODO build publish summary, with retry capbility.
-                builder.setTitle("Result");
-                builder.setMessage("Result published.")
-                        .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (result.getOrigin().getQuestionnaireConfig().isAutoCorrectionEnable()) {
-                                    try {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
-                                        Marks marks = CopySheetUtils.getMarks(result.getCopySheet(), result.getOrigin().getQuestionaire());
-                                        builder.setMessage("Score: " + marks.getValue() + "/" + marks.getMaximum());
-                                        builder.create().show();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        }).create().show();
-
-            }
-            return true;
-        }
-    };
+    public static final UIHandler.Displayer DEFAULT_UI_DISPLAYER = new DialogUIDisplayer();
     static List<UIHandler.Displayer> uiDisplayers = Collections.synchronizedList(new ArrayList() {
         {
             add(DEFAULT_UI_DISPLAYER);

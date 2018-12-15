@@ -1,4 +1,4 @@
-package com.android.qmaker.survey.core.utils;
+package com.android.qmaker.survey.core.utils.process;
 
 import com.istat.freedev.processor.Process;
 
