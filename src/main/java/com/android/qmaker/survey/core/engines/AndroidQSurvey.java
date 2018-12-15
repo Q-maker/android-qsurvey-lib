@@ -12,6 +12,7 @@ import com.qmaker.core.interfaces.RunnableDispatcher;
 import com.qmaker.survey.core.engines.PushExecutor;
 import com.qmaker.survey.core.entities.PushOrder;
 import com.qmaker.survey.core.interfaces.Pusher;
+import com.qmaker.survey.core.interfaces.SurveyStateListener;
 import com.qmaker.survey.core.utils.PayLoad;
 import com.android.qmaker.survey.core.pushers.HttpBasicPusher;
 import com.android.qmaker.survey.core.pushers.JwtPusher;
@@ -28,7 +29,7 @@ import java.util.List;
 /**
  * @author Toukea Tatsi J
  */
-public class AndroidQSurvey implements QSurvey.SurveyStateListener {
+public class AndroidQSurvey implements SurveyStateListener {
     public final static String TAG = "AndroidQSurvey";
     Context context;
     static AndroidQSurvey instance;
@@ -155,11 +156,12 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
 
     @Override
     public void onSurveyStateChanged(int state, Survey survey, PayLoad payLoad) {
-        if (state == QSurvey.SurveyStateListener.STATE_CANCELED) {
+        if (state == SurveyStateListener.STATE_CANCELED) {
             return;
         }
-        int bitResult = QSurvey.SurveyStateListener.STATE_FINISH & state;
+        int bitResult = SurveyStateListener.STATE_FINISH & state;
         if (state == bitResult) {
+            //TODO voir ci ce code ci ne peut pas être défini par des SurveyCompletionHandler.startHandling():boolean délocalisé sur le Qsurvey.
             Survey.Result result = payLoad.getVariable(0);
             List<PushOrder> pushOrders = payLoad.getVariable(1);
             UIHandler uiHandler = new UIHandler(result, pushOrders, currentShowingActivity);
@@ -227,15 +229,15 @@ public class AndroidQSurvey implements QSurvey.SurveyStateListener {
         return getQSurveyInstance().getPushExecutor();
     }
 
-    public boolean registerSurveyStateListener(QSurvey.SurveyStateListener stateListener) {
+    public boolean registerSurveyStateListener(SurveyStateListener stateListener) {
         return getQSurveyInstance().registerSurveyStateListener(stateListener);
     }
 
-    public boolean registerSurveyStateListener(int priority, QSurvey.SurveyStateListener stateListener) {
+    public boolean registerSurveyStateListener(int priority, SurveyStateListener stateListener) {
         return getQSurveyInstance().registerSurveyStateListener(priority, stateListener);
     }
 
-    public boolean unregisterSurveyStateListener(QSurvey.SurveyStateListener stateListener) {
+    public boolean unregisterSurveyStateListener(SurveyStateListener stateListener) {
         return getQSurveyInstance().unregisterSurveyStateListener(stateListener);
     }
 

@@ -1,7 +1,7 @@
 package com.android.qmaker.survey;
 
 import com.istat.freedev.processor.Process;
-import com.qmaker.survey.core.engines.QSurvey;
+import com.qmaker.survey.core.interfaces.SurveyStateListener;
 
 import org.junit.Test;
 
@@ -20,8 +20,8 @@ public class ExampleUnitTest {
 
     @Test
     public void testBitwise() {
-        int state = QSurvey.SurveyStateListener.STATE_PREPARED;
-        int bitWise = QSurvey.SurveyStateListener.STATE_FINISH & state;
+        int state = SurveyStateListener.STATE_PREPARED;
+        int bitWise = SurveyStateListener.STATE_FINISH & state;
         assertEquals(state, bitWise);
     }
 
