@@ -160,7 +160,7 @@ public class AndroidQSurvey implements SurveyStateListener {
             return;
         }
         int bitResult = SurveyStateListener.STATE_FINISH & state;
-        if (state == bitResult) {
+        if (state == bitResult && state != SurveyStateListener.STATE_CANCELED) {
             //TODO voir ci ce code ci ne peut pas être défini par des SurveyCompletionHandler.startHandling():boolean délocalisé sur le Qsurvey.
             Survey.Result result = payLoad.getVariable(0);
             List<PushOrder> pushOrders = payLoad.getVariable(1);
