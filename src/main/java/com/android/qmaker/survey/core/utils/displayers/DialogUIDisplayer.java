@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @author Toukea Tatsi J
  */
-public class DialogUIDisplayer implements UIHandler.Displayer {
+public class DialogUIDisplayer extends AbstractUIDisplayer {
     ProgressDialog progressDialog;
 
     @Override
@@ -50,7 +50,7 @@ public class DialogUIDisplayer implements UIHandler.Displayer {
                             if (result.getOrigin().getQuestionnaireConfig().isAutoCorrectionEnable()) {
                                 try {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
-                                    Marks marks = CopySheetUtils.getMarks(result.getCopySheet(), result.getOrigin().getQuestionaire());
+                                    Marks marks = CopySheetUtils.getMarks(result.getCopySheet(), result.getOrigin().getQuestionnaire());
                                     builder.setMessage("Score: " + marks.getValue() + "/" + marks.getMaximum());
                                     builder.create().show();
                                 } catch (Exception e) {

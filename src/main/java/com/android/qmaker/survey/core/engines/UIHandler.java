@@ -10,6 +10,7 @@ import com.qmaker.survey.core.utils.PayLoad;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 /**
  * @author Toukea Tatsi J
  */
@@ -57,6 +58,9 @@ public final class UIHandler implements PushExecutor.ExecutionStateChangeListene
                 }
                 if (pushOrders.isEmpty()) {
                     this.androidQSurvey.dispatchDisplayerSurveyResultPublishStateChanged(Displayer.STATE_FINISH, result, completedOrders);
+                    if (this.androidQSurvey.currentShowingActivity != null) {
+                        //TODO verifier que il sagit bien d'un testRunner et procéder a l'évaluation.
+                    }
                 }
             }
         }
