@@ -18,7 +18,7 @@ public abstract class AbstractUIDisplayer implements UIHandler.Displayer {
     }
 
     public interface TextProvider {
-        String getText(int state, PayLoad payLoad);
+        String getText(int id, PayLoad payLoad);
     }
 
 }
