@@ -25,37 +25,37 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
             return false;
         }
         if (STATE_STARTED == state) {
-            progressDialog = new ProgressDialog(currentActivity);
-            displayPublishStarting(currentActivity, progressDialog, payLoad);
+            displayPublishStarting(currentActivity, payLoad);
         } else if (STATE_PROGRESS == state) {
             if (progressDialog != null) {
-                displayPublishProgressing(currentActivity, progressDialog, payLoad);
+                displayPublishProgressing(currentActivity, payLoad);
             }
         } else if (STATE_FINISH == state) {
             if (progressDialog != null) {
                 progressDialog.cancel();
             }
-            displayPublishCompleted(currentActivity, progressDialog, payLoad);
+            displayPublishCompleted(currentActivity, payLoad);
 
         }
         return true;
     }
 
-    protected void displayPublishStarting(Activity currentActivity, ProgressDialog progressDialog, PayLoad payload) {
+    protected void displayPublishStarting(Activity currentActivity, PayLoad payload) {
+        progressDialog = new ProgressDialog(currentActivity);
         progressDialog.setMessage(getTextProvider().getText(STATE_STARTED, payload));
         progressDialog.show();
     }
 
-    protected void displayPublishProgressing(Activity currentActivity, ProgressDialog progressDialog, PayLoad payLoad) {
+    protected void displayPublishProgressing(Activity currentActivity, PayLoad payLoad) {
         progressDialog.setMessage(getTextProvider().getText(STATE_PROGRESS, payLoad));
     }
 
-    protected void displayPublishCompleted(final Activity currentActivity, ProgressDialog progressDialog, final PayLoad payLoad) {
-        final Survey.Result result = payLoad.getVariable(0);
+    protected void displayPublishCompleted(final Activity currentActivity, final PayLoad payLoad) {
+//        final Survey.Result result = payLoad.getVariable(0);
         AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
         builder.setTitle(getTextProvider().getText(TEXT_ID_FINISH_RESULT_TITLE, payLoad));
-        String correctButtonText = getTextProvider().getText(TEXT_ID_FINISH_RESULT_ACTION_SHOW_CORRECTION, payLoad);
-        String replayButtonText = getTextProvider().getText(TEXT_ID_FINISH_RESULT_ACTION_REPLAY, payLoad);
+//        String correctButtonText = getTextProvider().getText(TEXT_ID_FINISH_RESULT_ACTION_SHOW_CORRECTION, payLoad);
+//        String replayButtonText = getTextProvider().getText(TEXT_ID_FINISH_RESULT_ACTION_REPLAY, payLoad);
         String exitButtonText = getTextProvider().getText(TEXT_ID_FINISH_RESULT_ACTION_EXIT, payLoad);
         builder.setMessage(getTextProvider().getText(TEXT_ID_FINISH_RESULT_MESSAGE, payLoad))
                 .setPositiveButton(exitButtonText, new DialogInterface.OnClickListener() {
@@ -64,22 +64,22 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
                         currentActivity.finish();
                     }
                 });
-        if (replayButtonText != null && result.getOrigin().isReplayAllowed()) {
-            builder.setNeutralButton(replayButtonText, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    //TODO replay Test.
-                }
-            });
-        }
-        if (replayButtonText != null && result.getOrigin().getQuestionnaireConfig().isAutoCorrectionEnable()) {
-            builder.setNegativeButton(correctButtonText, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    //TODO proceed Test Eval.
-                }
-            });
-        }
+//        if (replayButtonText != null && result.getOrigin().isReplayAllowed()) {
+//            builder.setNeutralButton(replayButtonText, new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialog, int which) {
+//                    //TODO replay Test.
+//                }
+//            });
+//        }
+//        if (replayButtonText != null && result.getOrigin().getQuestionnaireConfig().isAutoCorrectionEnable()) {
+//            builder.setNegativeButton(correctButtonText, new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialog, int which) {
+//                    //TODO proceed Test Eval.
+//                }
+//            });
+//        }
 
         builder.create().show();
     }
@@ -127,7 +127,9 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
                         return "Result published";
                     }
                 case TEXT_ID_FINISH_RESULT_ACTION_OK:
-                    return "ok";
+                    return "Ok";
+                case TEXT_ID_FINISH_RESULT_ACTION_SHOW_CORRECTION:
+                    return "Correct";
                 case TEXT_ID_FINISH_RESULT_ACTION_REPLAY:
                     return "Replay";
                 case TEXT_ID_FINISH_RESULT_ACTION_EXIT:
