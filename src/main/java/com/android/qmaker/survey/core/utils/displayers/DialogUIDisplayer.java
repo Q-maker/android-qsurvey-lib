@@ -34,6 +34,7 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
             this.currentActivity = currentActivity;
             displayPublishStarting(currentActivity, payLoad);
         } else if (STATE_PROGRESS == state) {
+            this.currentActivity = currentActivity;
             if (progressDialog != null) {
                 displayPublishProgressing(currentActivity, payLoad);
             }
