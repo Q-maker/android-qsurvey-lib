@@ -3,6 +3,7 @@ package com.android.qmaker.survey.core.utils.displayers;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 
 import com.qmaker.core.entities.Marks;
@@ -18,13 +19,19 @@ import java.util.List;
  */
 public class DialogUIDisplayer extends AbstractUIDisplayer {
     protected ProgressDialog progressDialog;
+    Activity currentActivity;
 
     @Override
     public boolean onSurveyResultPublishStateChanged(final Activity currentActivity, int state, PayLoad payLoad) {
         if (currentActivity == null || currentActivity.isFinishing()) {
             return false;
         }
+        Survey.Result result = payLoad.getVariable(0);
+        if (result == null && result.getOrigin() == null || !result.getOrigin().isBlockingPublisherNeeded()) {
+            return false;
+        }
         if (STATE_STARTED == state) {
+            this.currentActivity = currentActivity;
             displayPublishStarting(currentActivity, payLoad);
         } else if (STATE_PROGRESS == state) {
             if (progressDialog != null) {
@@ -35,9 +42,13 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
                 progressDialog.cancel();
             }
             displayPublishCompleted(currentActivity, payLoad);
-
+            this.currentActivity = null;
         }
         return true;
+    }
+
+    public Activity getCurrentActivity() {
+        return currentActivity;
     }
 
     protected void displayPublishStarting(Activity currentActivity, PayLoad payload) {
@@ -50,12 +61,14 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
         progressDialog.setMessage(getTextProvider().getText(STATE_PROGRESS, payLoad));
     }
 
-    protected void displayPublishCompleted(final Activity currentActivity, final PayLoad payLoad) {
-//        final Survey.Result result = payLoad.getVariable(0);
+    void displayPublishCompleted(final Activity currentActivity, final PayLoad payLoad) {
+        AlertDialog.Builder builder = preparePublishCompletedDialog(currentActivity, payLoad);
+        builder.create().show();
+    }
+
+    protected AlertDialog.Builder preparePublishCompletedDialog(final Activity currentActivity, PayLoad payLoad) {
         AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
         builder.setTitle(getTextProvider().getText(TEXT_ID_FINISH_RESULT_TITLE, payLoad));
-//        String correctButtonText = getTextProvider().getText(TEXT_ID_FINISH_RESULT_ACTION_SHOW_CORRECTION, payLoad);
-//        String replayButtonText = getTextProvider().getText(TEXT_ID_FINISH_RESULT_ACTION_REPLAY, payLoad);
         String exitButtonText = getTextProvider().getText(TEXT_ID_FINISH_RESULT_ACTION_EXIT, payLoad);
         builder.setMessage(getTextProvider().getText(TEXT_ID_FINISH_RESULT_MESSAGE, payLoad))
                 .setPositiveButton(exitButtonText, new DialogInterface.OnClickListener() {
@@ -64,24 +77,7 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
                         currentActivity.finish();
                     }
                 });
-//        if (replayButtonText != null && result.getOrigin().isReplayAllowed()) {
-//            builder.setNeutralButton(replayButtonText, new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface dialog, int which) {
-//                    //TODO replay Test.
-//                }
-//            });
-//        }
-//        if (replayButtonText != null && result.getOrigin().getQuestionnaireConfig().isAutoCorrectionEnable()) {
-//            builder.setNegativeButton(correctButtonText, new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface dialog, int which) {
-//                    //TODO proceed Test Eval.
-//                }
-//            });
-//        }
-
-        builder.create().show();
+        return builder;
     }
 
     {
