@@ -19,6 +19,7 @@ import java.util.List;
 /**
  * @author Toukea Tatsi J
  */
+//TODO pour une bonne efficacité il devrai être joué en colaboration avec un Service.
 public class NotificationUIDisplayer extends AbstractUIDisplayer {
     protected ProgressDialog progressDialog;
     Activity currentActivity;

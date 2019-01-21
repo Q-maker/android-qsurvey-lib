@@ -58,7 +58,7 @@ public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, P
     protected abstract AsyncHttp onCreateAsyncHttp(PushOrder order);
 
     @Override
-    public boolean onProceed(PushOrder order, Pusher.Callback callback) {
+    public boolean proceed(PushOrder order, Pusher.Callback callback) {
         this.order = order;
         this.addCallback(createProcessCallback(callback));
         try {
