@@ -1,9 +1,17 @@
 package com.android.qmaker.survey;
 
+import android.webkit.MimeTypeMap;
+
 import com.istat.freedev.processor.Process;
 import com.qmaker.survey.core.interfaces.SurveyStateListener;
 
 import org.junit.Test;
+
+import java.io.File;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 
 import static org.junit.Assert.*;
 
@@ -62,5 +70,12 @@ public class ExampleUnitTest {
         int bitWise = contol | state;
         int bitWiseInv = contol & state;
         assertEquals(state, bitWiseInv);
+    }
+
+    @Test
+    public void testFileMimeTyp() {
+        File file = new File("/staorage/papa.jpg");
+        String extension = URLConnection.guessContentTypeFromName(file.getPath());//MimeTypeMap.getFileExtensionFromUrl(file.getPath());
+        assertEquals(extension, "jpg");
     }
 }

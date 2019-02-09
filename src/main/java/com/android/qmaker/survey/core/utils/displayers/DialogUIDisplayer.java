@@ -1,10 +1,12 @@
 package com.android.qmaker.survey.core.utils.displayers;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
+import android.widget.Toast;
 
 import com.qmaker.core.entities.Marks;
 import com.qmaker.core.utils.CopySheetUtils;
@@ -18,8 +20,8 @@ import java.util.List;
  * @author Toukea Tatsi J
  */
 public class DialogUIDisplayer extends AbstractUIDisplayer {
-    protected ProgressDialog progressDialog;
-    Activity currentActivity;
+    protected android.app.AlertDialog progressDialog;
+    Activity currentActivity, publishingActivity;
 
     @Override
     public boolean onSurveyResultPublishStateChanged(final Activity currentActivity, int state, PayLoad payLoad) {
@@ -32,13 +34,15 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
         }
         if (STATE_STARTED == state) {
             this.currentActivity = currentActivity;
-            displayPublishStarting(currentActivity, payLoad);
+            this.publishingActivity = currentActivity;
+            this.progressDialog = displayPublishStarting(currentActivity, payLoad);
         } else if (STATE_PROGRESS == state) {
             this.currentActivity = currentActivity;
             if (progressDialog != null) {
-                displayPublishProgressing(currentActivity, payLoad);
+                displayPublishProgressing(this.progressDialog, payLoad);
             }
         } else if (STATE_FINISH == state) {
+            //TODO traiter de façon specifique les cas de failed.
             if (progressDialog != null) {
                 progressDialog.cancel();
             }
@@ -52,30 +56,46 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
         return currentActivity;
     }
 
-    protected void displayPublishStarting(Activity currentActivity, PayLoad payload) {
+    protected android.app.AlertDialog displayPublishStarting(Activity currentActivity, PayLoad payload) {
+        if (currentActivity == null || currentActivity.isFinishing()) {
+            return null;
+        }
         progressDialog = new ProgressDialog(currentActivity);
         progressDialog.setMessage(getTextProvider().getText(STATE_STARTED, payload));
         progressDialog.show();
+        return progressDialog;
     }
 
-    protected void displayPublishProgressing(Activity currentActivity, PayLoad payLoad) {
-        progressDialog.setMessage(getTextProvider().getText(STATE_PROGRESS, payLoad));
+    protected void displayPublishProgressing(android.app.AlertDialog dialog, PayLoad payLoad) {
+        if (dialog == null) {
+            return;
+        }
+        dialog.setMessage(getTextProvider().getText(STATE_PROGRESS, payLoad));
     }
 
-    void displayPublishCompleted(final Activity currentActivity, final PayLoad payLoad) {
-        AlertDialog.Builder builder = preparePublishCompletedDialog(currentActivity, payLoad);
-        builder.create().show();
+    void displayPublishCompleted(final Activity activity, final PayLoad payLoad) {
+        if (activity == null) {
+            return;
+        }
+        AlertDialog.Builder builder = preparePublishCompletedDialog(activity, payLoad);
+        AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
     }
 
-    protected AlertDialog.Builder preparePublishCompletedDialog(final Activity currentActivity, PayLoad payLoad) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
+    protected AlertDialog.Builder preparePublishCompletedDialog(final Activity activity, PayLoad payLoad) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setCancelable(false);
         builder.setTitle(getTextProvider().getText(TEXT_ID_FINISH_RESULT_TITLE, payLoad));
         String exitButtonText = getTextProvider().getText(TEXT_ID_FINISH_RESULT_ACTION_EXIT, payLoad);
         builder.setMessage(getTextProvider().getText(TEXT_ID_FINISH_RESULT_MESSAGE, payLoad))
                 .setPositiveButton(exitButtonText, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        currentActivity.finish();
+                        if (activity == publishingActivity) {
+                            activity.finish();
+                        }
                     }
                 });
         return builder;
