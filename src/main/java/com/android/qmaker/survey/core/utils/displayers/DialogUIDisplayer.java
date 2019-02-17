@@ -29,7 +29,7 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
             return false;
         }
         Survey.Result result = payLoad.getVariable(0);
-        if (result == null && result.getOrigin() == null || !result.getOrigin().isBlockingPublisherNeeded()) {
+        if (result == null || result.getOrigin() == null || !result.getOrigin().isBlockingPublisherNeeded()) {
             return false;
         }
         if (STATE_STARTED == state) {
@@ -62,6 +62,9 @@ public class DialogUIDisplayer extends AbstractUIDisplayer {
         }
         progressDialog = new ProgressDialog(currentActivity);
         progressDialog.setMessage(getTextProvider().getText(STATE_STARTED, payload));
+        //TODO serait t'il mieux d'intercepter l'action de cancel et d'en profiter pour cancel le push?
+        progressDialog.setCancelable(false);
+        progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
         return progressDialog;
     }

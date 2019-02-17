@@ -30,7 +30,7 @@ public class NotificationUIDisplayer extends AbstractUIDisplayer {
             return false;
         }
         Survey.Result result = payLoad.getVariable(0);
-        if (result == null && result.getOrigin() == null || result.getOrigin().isBlockingPublisherNeeded()) {
+        if (result == null || result.getOrigin() == null || result.getOrigin().isBlockingPublisherNeeded() || result.getOrigin().isAnonymous()) {
             return false;
         }
         if (STATE_STARTED == state) {
