@@ -1,13 +1,10 @@
 package com.android.qmaker.survey.core.utils.displayers;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
-import com.android.qmaker.survey.core.engines.UIHandler;
 import com.qmaker.core.entities.Marks;
 import com.qmaker.core.utils.CopySheetUtils;
 import com.qmaker.survey.core.entities.PushOrder;

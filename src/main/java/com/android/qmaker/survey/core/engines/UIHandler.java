@@ -51,8 +51,8 @@ public final class UIHandler implements PushExecutor.ExecutionStateChangeListene
             if (pushOrders.contains(task.getOrder())) {
                 this.androidQSurvey.dispatchDisplayerSurveyResultPublishStateChanged(Displayer.STATE_PROGRESS, result, task.getOrder(), pushOrders, completedOrders);
                 int taskState = task.getState();
-                int bitAnd = PushOrder.STATE_FLAG_FINISHED & taskState;
-                if (bitAnd == PushOrder.STATE_FLAG_FINISHED) {
+                int bitAnd = PushOrder.FLAG_STATE_FINISHED & taskState;
+                if (bitAnd == PushOrder.FLAG_STATE_FINISHED) {
                     pushOrders.remove(task.getOrder());
                     completedOrders.add(task.getOrder());
                 }

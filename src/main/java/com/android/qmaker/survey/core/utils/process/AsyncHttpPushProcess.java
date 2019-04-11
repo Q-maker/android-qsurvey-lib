@@ -52,7 +52,7 @@ public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, P
         Repository repository = order.getRepository();
         asyncHttp.useDownloader(mSuccessDownloader, DownloadHandler.WHEN.SUCCESS);
         asyncHttp.useDownloader(mErrorDownloader, DownloadHandler.WHEN.ERROR);
-        this.asyncQuery = asyncHttp.doPost(mHttpCallback, repository.getUri());
+        this.asyncQuery = asyncHttp.doPost(repository.getUri(), mHttpCallback);
     }
 
     protected abstract AsyncHttp onCreateAsyncHttp(PushOrder order);
@@ -122,7 +122,7 @@ public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, P
         };
     }
 
-    HttpAsyncQuery.HttpQueryCallback mHttpCallback = new HttpAsyncQuery.HttpQueryCallback() {
+    HttpAsyncQuery.Callback mHttpCallback = new HttpAsyncQuery.Callback() {
 
         @Override
         public void onHttpSuccess(HttpQueryResult resp) {
@@ -135,7 +135,7 @@ public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, P
         }
 
         @Override
-        public void onHttpFail(Exception e) {
+        public void onHttpFailure(Exception e) {
             notifyFailed(e);
         }
 
