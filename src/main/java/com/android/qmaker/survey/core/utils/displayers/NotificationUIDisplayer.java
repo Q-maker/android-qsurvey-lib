@@ -27,7 +27,7 @@ public class NotificationUIDisplayer extends AbstractUIDisplayer {
             return false;
         }
         Survey.Result result = payLoad.getVariable(0);
-        if (result == null || result.getOrigin() == null || result.getOrigin().isBlockingPublisherNeeded() || result.getOrigin().isAnonymous()) {
+        if (result == null || result.getSource() == null || result.getSource().isBlockingPublisherNeeded() || result.getSource().isAnonymous()) {
             return false;
         }
         if (STATE_STARTED == state) {
@@ -109,14 +109,14 @@ public class NotificationUIDisplayer extends AbstractUIDisplayer {
                 case TEXT_ID_PUBLISH_PROGRESSING:
                     List<PushOrder> list = payLoad.getVariable(2);
                     Survey.Result result = payLoad.getVariable(0);
-                    int repositoryCount = result.getOrigin().getRepositories().size();
+                    int repositoryCount = result.getSource().getRepositories().size();
                     return "Please wait, result publishing " + (repositoryCount - list.size()) + "/" + repositoryCount;
                 case TEXT_ID_FINISH_RESULT_TITLE:
                     return "Result published";
                 case TEXT_ID_FINISH_RESULT_MESSAGE:
                     try {
                         result = payLoad.getVariable(0);
-                        Marks marks = CopySheetUtils.getMarks(result.getCopySheet(), result.getOrigin().getQuestionnaire());
+                        Marks marks = CopySheetUtils.getMarks(result.getCopySheet(), result.getSource().getQuestionnaire());
                         return "Result published\n\nScore: " + marks.getValue() + "/" + marks.getMaximum();
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -39,7 +39,7 @@ public final class UIHandler implements PushExecutor.ExecutionStateChangeListene
         boolean out = this.androidQSurvey
                 .getPushExecutor()
                 .unregisterExecutionStateChangeListener(this);
-        out &= androidQSurvey.detachUIHandler(result.getOrigin());
+        out &= androidQSurvey.detachUIHandler(result.getSource());
         this.androidQSurvey.dispatchDisplayerSurveyResultPublishStateChanged(Displayer.STATE_CANCELED, result, pushOrders, completedOrders);
         this.androidQSurvey = null;
         return out;
