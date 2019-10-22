@@ -1,12 +1,17 @@
 apply plugin: 'com.android.library'
-
+ext {
+    PUBLISH_GROUP_ID = 'com.qmaker'
+    PUBLISH_ARTIFACT_ID = 'android-qsurvey'
+    PUBLISH_VERSION = '1.1.11'
+}
+apply from: 'release-jar.gradle'
 android {
     compileSdkVersion 26
     buildToolsVersion "27.0.3"
 
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
