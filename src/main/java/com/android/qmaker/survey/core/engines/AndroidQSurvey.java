@@ -49,7 +49,7 @@ public class AndroidQSurvey implements SurveyStateListener {
             throw new IllegalStateException("AndroidQSurvey instance is already initialized and is ready do be get using getInstance");
         }
         instance = new AndroidQSurvey(context);
-        instance.init();
+        instance.initialize();
         return instance;
     }
 
@@ -71,7 +71,7 @@ public class AndroidQSurvey implements SurveyStateListener {
         return instance != null;
     }
 
-    private void init() {
+    private void initialize() {
         QSurvey qSurvey = prepare();
 //        qSurvey.appendPusher(new FileIoPusher(this.context));
         qSurvey.appendPusher(new JwtPusher());
