@@ -1,4 +1,4 @@
-package com.android.qmaker.survey.core.utils.process;
+package com.android.qmaker.survey.core.process;
 
 
 import com.istat.freedev.processor.Process;
@@ -6,7 +6,7 @@ import com.istat.freedev.processor.ProcessManager;
 import com.istat.freedev.processor.Processor;
 import com.istat.freedev.processor.interfaces.ProcessCallback;
 import com.qmaker.survey.core.engines.PushError;
-import com.qmaker.survey.core.engines.PushResponse;
+import com.qmaker.survey.core.engines.Response;
 import com.qmaker.survey.core.engines.PushResult;
 import com.qmaker.survey.core.entities.PushOrder;
 import com.qmaker.survey.core.entities.Repository;
@@ -71,7 +71,7 @@ public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, P
     }
 
     @Override
-    public PushResponse getResponse() {
+    public Response getResponse() {
         if (getState() == Process.STATE_SUCCESS) {
             return getResult();
         }

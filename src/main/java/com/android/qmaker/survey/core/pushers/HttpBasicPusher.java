@@ -1,6 +1,6 @@
 package com.android.qmaker.survey.core.pushers;
 
-import com.android.qmaker.survey.core.utils.process.AsyncHttpPushProcess;
+import com.android.qmaker.survey.core.process.AsyncHttpPushProcess;
 import com.qmaker.survey.core.entities.PushOrder;
 import com.qmaker.survey.core.entities.Repository;
 import com.qmaker.survey.core.interfaces.PushProcess;
@@ -8,7 +8,7 @@ import com.qmaker.survey.core.interfaces.Pusher;
 
 import istat.android.network.http.AsyncHttp;
 import istat.android.network.http.BodyPartHttpQuery;
-import istat.android.network.http.SimpleHttpQuery;
+
 /**
  * @author Toukea Tatsi J
  */
