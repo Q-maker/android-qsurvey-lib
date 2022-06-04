@@ -19,8 +19,8 @@ public class HttpBasicPusher implements Pusher {
     }
 
     @Override
-    public String getSupportedGrandType() {
-        return Repository.GRAND_TYPE_HTTP_BASIC;
+    public String getSupportedAccessType() {
+        return Repository.ACCESS_TYPE_HTTP_BASIC;
     }
 
 

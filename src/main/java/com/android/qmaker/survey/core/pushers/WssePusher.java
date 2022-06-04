@@ -17,8 +17,8 @@ public class WssePusher implements Pusher {
     }
 
     @Override
-    public String getSupportedGrandType() {
-        return Repository.GRAND_TYPE_WSSE;
+    public String getSupportedAccessType() {
+        return Repository.ACCESS_TYPE_HTTP_WSSE;
     }
 
     class Process extends AsyncHttpPushProcess {

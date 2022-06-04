@@ -116,7 +116,7 @@ public class NotificationUIDisplayer extends AbstractUIDisplayer {
                 case TEXT_ID_FINISH_RESULT_MESSAGE:
                     try {
                         result = payLoad.getVariable(0);
-                        Marks marks = CopySheetUtils.getMarks(result.getCopySheet(), result.getSource().getQuestionnaire());
+                        Marks marks = CopySheetUtils.getMarks(result.getCopySheet());
                         return "Result published\n\nScore: " + marks.getValue() + "/" + marks.getMaximum();
                     } catch (Exception e) {
                         e.printStackTrace();

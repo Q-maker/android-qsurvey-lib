@@ -5,7 +5,6 @@ import com.istat.freedev.processor.Process;
 import com.istat.freedev.processor.ProcessManager;
 import com.istat.freedev.processor.Processor;
 import com.istat.freedev.processor.interfaces.ProcessCallback;
-import com.qmaker.survey.core.engines.PushError;
 import com.qmaker.survey.core.engines.Response;
 import com.qmaker.survey.core.engines.PushResult;
 import com.qmaker.survey.core.entities.PushOrder;
@@ -25,7 +24,7 @@ import istat.android.network.http.interfaces.DownloadHandler;
 /**
  * @author Toukea Tatsi J
  */
-public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, PushError> implements PushProcess {
+public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, PushProcess.Error> implements PushProcess {
     PushOrder order;
     ProcessManager processManager;
     HttpAsyncQuery asyncQuery;
@@ -78,8 +77,8 @@ public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, P
         return getError();
     }
 
-    static ProcessCallback<PushResult, PushError> createProcessCallback(final Pusher.Callback callback) {
-        return new ProcessCallback<PushResult, PushError>() {
+    static ProcessCallback<PushResult, Error> createProcessCallback(final Pusher.Callback callback) {
+        return new ProcessCallback<PushResult, Error>() {
             @Override
             public void onStart() {
 
@@ -100,7 +99,7 @@ public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, P
             }
 
             @Override
-            public void onError(PushError pushError) {
+            public void onError(Error pushError) {
                 if (callback != null) {
                     callback.onError(pushError);
                 }
@@ -131,7 +130,7 @@ public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, P
 
         @Override
         public void onHttpError(HttpQueryError e) {
-            notifyError(e.getBodyAs(PushError.class));
+            notifyError(e.getBodyAs(Error.class));
         }
 
         @Override
@@ -157,9 +156,9 @@ public abstract class AsyncHttpPushProcess extends AsycHttpProcess<PushResult, P
         }
     };
 
-    DownloadHandler<PushError> mErrorDownloader = new DownloadHandler<PushError>() {
+    DownloadHandler<Error> mErrorDownloader = new DownloadHandler<Error>() {
         @Override
-        public PushError onBuildResponseBody(HttpURLConnection connexion, InputStream stream) throws Exception {
+        public Error onBuildResponseBody(HttpURLConnection connexion, InputStream stream) throws Exception {
             return null;
         }
     };

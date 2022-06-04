@@ -17,7 +17,7 @@ public class HttpDigestPusher implements Pusher {
     }
 
     @Override
-    public String getSupportedGrandType() {
+    public String getSupportedAccessType() {
         return Repository.GRAND_TYPE_HTTP_DIGEST;
     }
 

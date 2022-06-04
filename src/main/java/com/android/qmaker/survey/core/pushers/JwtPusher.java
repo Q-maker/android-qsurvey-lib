@@ -18,8 +18,8 @@ public class JwtPusher implements Pusher {
     }
 
     @Override
-    public String getSupportedGrandType() {
-        return Repository.GRAND_TYPE_JWT;
+    public String getSupportedAccessType() {
+        return Repository.ACCESS_TYPE_HTTP_JWT;
     }
 
     class Process extends AsyncHttpPushProcess {
