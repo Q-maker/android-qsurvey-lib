@@ -7,14 +7,11 @@ ext {
 apply from: 'release-jar.gradle'
 android {
     compileSdkVersion 28
-    buildToolsVersion '28.0.3'
 
 
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -32,11 +29,11 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    compile project(':qsurvey-core-lib')
-    compile project(path: ':android-processor-tools')
+    api project(':qsurvey-core-lib')
+    api project(path: ':android-processor-tools')
 //    compile project(':qcmmakercore')
 //    implementation 'com.android.support:appcompat-v7:27.1.1'
-    compile 'androidx.appcompat:appcompat:1.2.0'
+    api 'androidx.appcompat:appcompat:1.2.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
