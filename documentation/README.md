@@ -8,8 +8,8 @@
 
 | Content | Location |
 |---------|----------|
-| Module architecture & code | [documents-qmaker-private/architecture/](../../documents-qmaker-private/architecture/) |
-| User guide | [documents-qmaker-public/user-guide/](../../documents-qmaker-public/user-guide/) |
+| Module architecture & code | [documents-qmaker-private/qsurvey/](../../documents-qmaker-private/qsurvey/) |
+| User guide | [documents-qmaker-public/](../../documents-qmaker-public/) |
 | Documentation strategy | [DOC_STRATEGY.md](../../DOC_STRATEGY.md) |
 
 ## Module role
