@@ -3,10 +3,10 @@ package com.android.qmaker.survey.core.utils.displayers;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+
 import androidx.appcompat.app.AlertDialog;
 
-import com.qmaker.core.entities.Marks;
-import com.qmaker.core.utils.CopySheetUtils;
+import com.qmaker.core.utils.Rating;
 import com.qmaker.survey.core.entities.PushOrder;
 import com.qmaker.survey.core.entities.Survey;
 import com.qmaker.survey.core.utils.PayLoad;
@@ -116,8 +116,8 @@ public class NotificationUIDisplayer extends AbstractUIDisplayer {
                 case TEXT_ID_FINISH_RESULT_MESSAGE:
                     try {
                         result = payLoad.getVariable(0);
-                        Marks marks = CopySheetUtils.getMarks(result.getCopySheet());
-                        return "Result published\n\nScore: " + marks.getValue() + "/" + marks.getMaximum();
+                        Rating rating = result.getCopySheet().getRating();
+                        return "Result published\n\nScore: " + rating.getReachedMarks()+ "/" + rating.getMaximumMarks();
                     } catch (Exception e) {
                         e.printStackTrace();
                         return "Result published";
