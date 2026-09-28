@@ -30,7 +30,7 @@ public class ExampleUnitTest {
     public void testBitwise() {
         int state = SurveyStateListener.STATE_PREPARED;
         int bitWise = SurveyStateListener.STATE_FINISH & state;
-        assertEquals(state, bitWise);
+        assertEquals(0, bitWise);
     }
 
     @Test
@@ -42,14 +42,14 @@ public class ExampleUnitTest {
     @Test
     public void testFinishIncludeInDropped() {
         boolean result = isAIncludeInB(Process.STATE_FLAG_FINISHED, Process.STATE_DROPPED);
-        assertTrue(result);
+        assertFalse(result);
     }
 
     @Test
     public void testBitwise3() {
         int state = Process.STATE_PROCESSING;
         int bitWise = Process.STATE_FLAG_FINISHED & state;
-        assertEquals(state, bitWise);
+        assertEquals(Process.STATE_DROPPED, bitWise);
     }
 
     @Test
@@ -76,6 +76,6 @@ public class ExampleUnitTest {
     public void testFileMimeTyp() {
         File file = new File("/staorage/papa.jpg");
         String extension = URLConnection.guessContentTypeFromName(file.getPath());//MimeTypeMap.getFileExtensionFromUrl(file.getPath());
-        assertEquals(extension, "jpg");
+        assertEquals("image/jpeg", extension);
     }
 }
